@@ -4,7 +4,7 @@ public final class AsmUtils {
     private AsmUtils() {}
 
     // #@@range/align{
-    static public long align(long n, long alignment) {
+    public static long align(long n, long alignment) {
         return (n + alignment - 1) / alignment * alignment;
     }
     // #@@}

@@ -13,25 +13,40 @@ import net.loveruby.cflat.utils.ErrorHandler;
 import java.io.*;
 import java.util.List;
 
+/**
+ * 编译器主入口
+ *
+ * @author Asion
+ */
 public class Compiler {
     // #@@range/main{
     static final String ProgramName = "cbc";
     static final String Version = "1.0.0";
 
+    /**
+     * bootstrap
+     *
+     * @param args command parameters
+     */
     static public void main(String[] args) {
         new Compiler(ProgramName).commandMain(args);
     }
 
     private final ErrorHandler errorHandler;
 
-    public Compiler(String programName) {
+    private Compiler(String programName) {
         this.errorHandler = new ErrorHandler(programName);
     }
     // #@@}
 
-    public void commandMain(String[] args) {
+    /**
+     * 处理参数，检查语法，构建，编译src
+     *
+     * @param args 参数
+     */
+    private void commandMain(String[] args) {
         Options opts = parseOptions(args);
-        if (opts.mode() == CompilerMode.CheckSyntax) {
+        if (opts == null || opts.mode() == CompilerMode.CheckSyntax) {
             System.exit(checkSyntax(opts) ? 0 : 1);
         }
         try {
@@ -45,6 +60,13 @@ public class Compiler {
         }
     }
 
+    /**
+     * 处理参数
+     *
+     * @param args 参数
+     * @return 配置选项
+     * @see net.loveruby.cflat.compiler.Options#parse(String[])
+     */
     private Options parseOptions(String[] args) {
         try {
             return Options.parse(args);
@@ -89,7 +111,7 @@ public class Compiler {
      * @throws CompileException CompileException
      */
     // #@@range/build{
-    public void build(List<SourceFile> srcs, Options opts)
+    private void build(List<SourceFile> srcs, Options opts)
             throws CompileException {
         for (SourceFile src : srcs) {
 
@@ -124,7 +146,7 @@ public class Compiler {
      * @param opts     参数
      * @throws CompileException 编译异常
      */
-    public void compile(String srcPath, String destPath, Options opts) throws CompileException {
+    private void compile(String srcPath, String destPath, Options opts) throws CompileException {
 
         //------------------编译器前端 start---------------------
         // 1.解析源代码 得到抽象语法树（AST）
@@ -159,12 +181,12 @@ public class Compiler {
         writeFile(destPath, asm.toSource());
     }
 
-    public AST parseFile(String path, Options opts) throws SyntaxException, FileException {
+    private AST parseFile(String path, Options opts) throws SyntaxException, FileException {
         return Parser.parseFile(new File(path), opts.loader(), errorHandler, opts.doesDebugParser());
     }
 
-    public AST semanticAnalyze(AST ast, TypeTable types,
-                               Options opts) throws SemanticException {
+    private AST semanticAnalyze(AST ast, TypeTable types,
+                                Options opts) throws SemanticException {
         new LocalResolver(errorHandler).resolve(ast);
         new TypeResolver(types, errorHandler).resolve(ast);
         types.semanticCheck(errorHandler);
@@ -177,21 +199,22 @@ public class Compiler {
         return ast;
     }
 
-    public AssemblyCode generateAssembly(IR ir, Options opts) {
+    private AssemblyCode generateAssembly(IR ir, Options opts) {
         return opts.codeGenerator(errorHandler).generate(ir);
     }
 
     // #@@range/assemble{
-    public void assemble(String srcPath, String destPath,
-                         Options opts) throws IPCException {
+    private void assemble(String srcPath, String destPath,
+                          Options opts) throws IPCException {
         opts.assembler(errorHandler)
                 .assemble(srcPath, destPath, opts.asOptions());
     }
     // #@@}
 
     // #@@range/link{
-    public void link(Options opts) throws IPCException {
+    private void link(Options opts) throws IPCException {
         if (!opts.isGeneratingSharedLibrary()) {
+
             generateExecutable(opts);
         } else {
             generateSharedLibrary(opts);
@@ -200,14 +223,14 @@ public class Compiler {
     // #@@}
 
     // #@@range/generateExecutable{
-    public void generateExecutable(Options opts) throws IPCException {
+    private void generateExecutable(Options opts) throws IPCException {
         opts.linker(errorHandler).generateExecutable(
                 opts.ldArgs(), opts.exeFileName(), opts.ldOptions());
     }
     // #@@}
 
     // #@@range/generateSharedLibrary{
-    public void generateSharedLibrary(Options opts) throws IPCException {
+    private void generateSharedLibrary(Options opts) throws IPCException {
         opts.linker(errorHandler).generateSharedLibrary(
                 opts.ldArgs(), opts.soFileName(), opts.ldOptions());
     }
@@ -219,12 +242,9 @@ public class Compiler {
             return;
         }
         try {
-            BufferedWriter f = new BufferedWriter(
-                    new OutputStreamWriter(new FileOutputStream(path)));
-            try {
+            try (BufferedWriter f = new BufferedWriter(
+                    new OutputStreamWriter(new FileOutputStream(path)))) {
                 f.write(str);
-            } finally {
-                f.close();
             }
         } catch (FileNotFoundException ex) {
             errorHandler.error("file not found: " + path);

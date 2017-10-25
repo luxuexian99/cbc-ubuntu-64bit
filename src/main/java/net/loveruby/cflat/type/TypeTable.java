@@ -1,9 +1,16 @@
 package net.loveruby.cflat.type;
-import net.loveruby.cflat.ast.*;
+import net.loveruby.cflat.ast.Slot;
 import net.loveruby.cflat.utils.ErrorHandler;
-import net.loveruby.cflat.exception.*;
-import java.util.*;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * 类型表
+ * </p>
+ * 如：char long int等
+ */
 public class TypeTable {
     static public TypeTable ilp32() { return newTable(1, 2, 4, 4, 4); }
     static public TypeTable ilp64() { return newTable(1, 2, 8, 8, 8); }
@@ -225,7 +232,7 @@ public class TypeTable {
 
     // #@@range/checkRecursiveDefinition{
     protected void checkRecursiveDefinition(Type t, ErrorHandler h) {
-        _checkRecursiveDefinition(t, new HashMap<Type, Object>(), h);
+        _checkRecursiveDefinition(t, new HashMap<>(), h);
     }
 
     static final protected Object checking = new Object();

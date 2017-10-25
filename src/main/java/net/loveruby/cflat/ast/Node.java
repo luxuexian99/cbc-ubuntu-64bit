@@ -1,7 +1,13 @@
 package net.loveruby.cflat.ast;
 import java.io.PrintStream;
 
-abstract public class Node implements Dumpable {
+/**
+ * <p>
+ * 节点
+ * </p>
+ * 主要用在节点有关的数据结构上。
+ */
+public abstract class Node implements Dumpable {
     public Node() {
     }
 

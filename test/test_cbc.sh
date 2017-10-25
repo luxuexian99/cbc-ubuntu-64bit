@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #
 # test_cbc.sh
 #

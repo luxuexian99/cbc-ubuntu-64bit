@@ -4,8 +4,7 @@ prefix="${1:-/usr/local/cbc}"
 BINS="bin/cbc"
 LIBS="lib/cbc.jar lib/libcbc.a"
 
-main()
-{
+main() {
     if ! [[ -f lib/cbc.jar && -f lib/libcbc.a ]]
     then
         echo "lib/cbc.jar and lib/libcbc.a do not exist.  Build it first" 1>&2
@@ -21,8 +20,7 @@ main()
     echo "cbc successfully installed as $prefix/bin/cbc"
 }
 
-invoke()
-{
+invoke() {
     echo "$@"
     if ! "$@"
     then

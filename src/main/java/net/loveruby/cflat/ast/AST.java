@@ -8,7 +8,7 @@ import java.io.PrintStream;
 public class AST extends Node {
     protected Location source;
     protected Declarations declarations;
-    protected ToplevelScope scope;
+    protected TopLevelScope scope;
     protected ConstantTable constantTable;
 
     public AST(Location source, Declarations declarations) {
@@ -67,14 +67,14 @@ public class AST extends Node {
     }
 
     // called by LocalResolver
-    public void setScope(ToplevelScope scope) {
+    public void setScope(TopLevelScope scope) {
         if (this.scope != null) {
-            throw new Error("must not happen: ToplevelScope set twice");
+            throw new Error("must not happen: TopLevelScope set twice");
         }
         this.scope = scope;
     }
 
-    public ToplevelScope scope() {
+    public TopLevelScope scope() {
         if (this.scope == null) {
             throw new Error("must not happen: AST.scope is null");
         }

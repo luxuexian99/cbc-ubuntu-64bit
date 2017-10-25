@@ -6,12 +6,12 @@ import java.util.*;
 import java.io.*;
 
 public class LibraryLoader {
-    protected List<String> loadPath;
-    protected LinkedList<String> loadingLibraries;
-    protected Map<String, Declarations> loadedLibraries;
+    private List<String> loadPath;
+    private LinkedList<String> loadingLibraries;
+    private Map<String, Declarations> loadedLibraries;
 
-    static public List<String> defaultLoadPath() {
-        List<String> pathes = new ArrayList<String>();
+    private static List<String> defaultLoadPath() {
+        List<String> pathes = new ArrayList<>();
         pathes.add(".");
         return pathes;
     }
@@ -22,15 +22,15 @@ public class LibraryLoader {
 
     public LibraryLoader(List<String> loadPath) {
         this.loadPath = loadPath;
-        this.loadingLibraries = new LinkedList<String>();
-        this.loadedLibraries = new HashMap<String, Declarations>();
+        this.loadingLibraries = new LinkedList<>();
+        this.loadedLibraries = new HashMap<>();
     }
 
     public void addLoadPath(String path) {
         loadPath.add(path);
     }
 
-    public Declarations loadLibrary(String libid, ErrorHandler handler)
+    Declarations loadLibrary(String libid, ErrorHandler handler)
             throws CompileException {
         if (loadingLibraries.contains(libid)) {
             throw new SemanticException("recursive import from "
@@ -49,7 +49,7 @@ public class LibraryLoader {
         return decls;
     }
 
-    public File searchLibrary(String libid) throws FileException {
+    private File searchLibrary(String libid) throws FileException {
         try {
             for (String path : loadPath) {
                 File file = new File(path + "/" + libPath(libid) + ".hb");
@@ -65,7 +65,7 @@ public class LibraryLoader {
         }
     }
 
-    protected String libPath(String id) {
+    private String libPath(String id) {
         return id.replace('.', '/');
     }
 }

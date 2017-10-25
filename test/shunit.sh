@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #
 # $Id: shunit.sh 1096 2006-11-02 12:31:46Z aamine $
 #

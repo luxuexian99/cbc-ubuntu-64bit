@@ -6,21 +6,24 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 中间代码
+ */
 public class IR {
-    Location source;
-    List<DefinedVariable> defvars;
-    List<DefinedFunction> defuns;
-    List<UndefinedFunction> funcdecls;
-    ToplevelScope scope;
-    ConstantTable constantTable;
-    List<DefinedVariable> gvars;   // cache
-    List<DefinedVariable> comms;   // cache
+    private Location source;
+    private List<DefinedVariable> defvars;
+    private List<DefinedFunction> defuns;
+    private List<UndefinedFunction> funcdecls;
+    private TopLevelScope scope;
+    private ConstantTable constantTable;
+    private List<DefinedVariable> gvars;   // cache
+    private List<DefinedVariable> comms;   // cache
 
     public IR(Location source,
             List<DefinedVariable> defvars,
             List<DefinedFunction> defuns,
             List<UndefinedFunction> funcdecls,
-            ToplevelScope scope,
+            TopLevelScope scope,
             ConstantTable constantTable) {
         super();
         this.source = source;
@@ -51,7 +54,7 @@ public class IR {
         return defuns;
     }
 
-    public ToplevelScope scope() {
+    public TopLevelScope scope() {
         return scope;
     }
 

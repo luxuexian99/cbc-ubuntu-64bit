@@ -3,7 +3,7 @@ package net.loveruby.cflat.type;
 public class ArrayTypeRef extends TypeRef {
     protected TypeRef baseType;
     protected long length;
-    static final protected long undefined = -1;
+    protected static final long undefined = -1;
 
     public ArrayTypeRef(TypeRef baseType) {
         super(baseType.location());

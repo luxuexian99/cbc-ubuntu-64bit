@@ -3,6 +3,9 @@ import net.loveruby.cflat.exception.*;
 import java.util.List;
 import java.util.ArrayList;
 
+/**
+ * 作用域
+ */
 abstract public class Scope {
     protected List<LocalScope> children;
 
@@ -10,9 +13,9 @@ abstract public class Scope {
         children = new ArrayList<LocalScope>();
     }
 
-    abstract public boolean isToplevel();
-    abstract public ToplevelScope toplevel();
-    abstract public Scope parent();
+    public abstract boolean isTopLevel();
+    public abstract TopLevelScope topLevel();
+    public abstract Scope parent();
 
     protected void addChild(LocalScope s) {
         children.add(s);

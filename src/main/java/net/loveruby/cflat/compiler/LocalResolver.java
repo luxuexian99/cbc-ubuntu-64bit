@@ -28,7 +28,7 @@ public class LocalResolver extends Visitor {
 
     // #@@range/resolve{
     public void resolve(AST ast) throws SemanticException {
-        ToplevelScope toplevel = new ToplevelScope();
+        TopLevelScope toplevel = new TopLevelScope();
         scopeStack.add(toplevel);
 
         // #@@range/declareToplevel{

@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import java.io.PrintStream;
 
 public class AssemblyCode implements net.loveruby.cflat.sysdep.AssemblyCode {
-    final Type naturalType;
-    final long stackWordSize;
-    final SymbolTable labelSymbols;
-    final boolean verbose;
+    private final Type naturalType;
+    private final long stackWordSize;
+    private final SymbolTable labelSymbols;
+    private final boolean verbose;
     final VirtualStack virtualStack = new VirtualStack();
     private List<Assembly> assemblies = new ArrayList<Assembly>();
     private int commentIndentLevel = 0;
@@ -32,7 +32,7 @@ public class AssemblyCode implements net.loveruby.cflat.sysdep.AssemblyCode {
     }
 
     public String toSource() {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         for (Assembly asm : assemblies) {
             buf.append(asm.toSource(labelSymbols));
             buf.append("\n");

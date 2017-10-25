@@ -4,21 +4,21 @@ import net.loveruby.cflat.utils.ErrorHandler;
 
 import java.util.*;
 
-public class ToplevelScope extends Scope {
+public class TopLevelScope extends Scope {
     protected Map<String, Entity> entities;
     protected List<DefinedVariable> staticLocalVariables;   // cache
 
-    public ToplevelScope() {
+    public TopLevelScope() {
         super();
         entities = new LinkedHashMap<String, Entity>();
         staticLocalVariables = null;
     }
 
-    public boolean isToplevel() {
+    public boolean isTopLevel() {
         return true;
     }
 
-    public ToplevelScope toplevel() {
+    public TopLevelScope topLevel() {
         return this;
     }
 
@@ -52,7 +52,7 @@ public class ToplevelScope extends Scope {
     }
     // #@@}
 
-    /** Searches and gets entity searching scopes upto ToplevelScope. */
+    /** Searches and gets entity searching scopes upto TopLevelScope. */
     // #@@range/get{
     public Entity get(String name) throws SemanticException {
         Entity ent = entities.get(name);

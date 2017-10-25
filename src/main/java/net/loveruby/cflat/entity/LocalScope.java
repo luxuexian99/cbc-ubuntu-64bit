@@ -15,12 +15,12 @@ public class LocalScope extends Scope {
         variables = new LinkedHashMap<String, DefinedVariable>();
     }
 
-    public boolean isToplevel() {
+    public boolean isTopLevel() {
         return false;
     }
 
-    public ToplevelScope toplevel() {
-        return parent.toplevel();
+    public TopLevelScope topLevel() {
+        return parent.topLevel();
     }
 
     public Scope parent() {

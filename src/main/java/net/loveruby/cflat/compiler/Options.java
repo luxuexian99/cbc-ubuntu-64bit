@@ -1,4 +1,5 @@
 package net.loveruby.cflat.compiler;
+
 import net.loveruby.cflat.exception.OptionParseError;
 import net.loveruby.cflat.parser.LibraryLoader;
 import net.loveruby.cflat.sysdep.*;
@@ -11,7 +12,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
 
+/**
+ * 配置选项处理类
+ */
 class Options {
+
     static Options parse(String[] args) {
         Options opts = new Options();
         opts.parseArgs(args);
@@ -76,8 +81,7 @@ class Options {
         }
         if (sourceFiles.size() == 1) {
             return sourceFiles.get(0).linkedFileName(newExt);
-        }
-        else {
+        } else {
             return DEFAULT_LINKER_OUTPUT;
         }
     }
@@ -134,7 +138,7 @@ class Options {
         return ldOptions.generatingSharedLibrary;
     }
 
-    void parseArgs(String[] origArgs) {
+    private void parseArgs(String[] origArgs) {
         sourceFiles = new ArrayList<SourceFile>();
         ldArgs = new ArrayList<LdArg>();
         ListIterator<String> args = Arrays.asList(origArgs).listIterator();
@@ -143,111 +147,85 @@ class Options {
             if (arg.equals("--")) {
                 // "--" Stops command line processing
                 break;
-            }
-            else if (arg.startsWith("-")) {
+            } else if (arg.startsWith("-")) {
                 if (CompilerMode.isModeOption(arg)) {
                     if (mode != null) {
                         parseError(mode.toOption() + " option and "
-                                   + arg + " option is exclusive");
+                                + arg + " option is exclusive");
                     }
                     mode = CompilerMode.fromOption(arg);
-                }
-                else if (arg.startsWith("-I")) {
+                } else if (arg.startsWith("-I")) {
                     loader.addLoadPath(getOptArg(arg, args));
-                }
-                else if (arg.equals("--debug-parser")) {
+                } else if (arg.equals("--debug-parser")) {
                     debugParser = true;
-                }
-                else if (arg.startsWith("-o")) {
+                } else if (arg.startsWith("-o")) {
                     outputFileName = getOptArg(arg, args);
-                }
-                else if (arg.equals("-fpic")
+                } else if (arg.equals("-fpic")
                         || arg.equals("-fPIC")) {
                     genOptions.generatePIC();
-                }
-                else if (arg.equals("-fpie")
+                } else if (arg.equals("-fpie")
                         || arg.equals("-fPIE")) {
                     genOptions.generatePIE();
-                }
-                else if (arg.startsWith("-O")) {
+                } else if (arg.startsWith("-O")) {
                     String type = arg.substring(2);
-                    if (! type.matches("^([0123s]|)$")) {
+                    if (!type.matches("^([0123s]|)$")) {
                         parseError("unknown optimization switch: " + arg);
                     }
                     genOptions.setOptimizationLevel(type.equals("0") ? 0 : 1);
-                }
-                else if (arg.equals("-fverbose-asm")
+                } else if (arg.equals("-fverbose-asm")
                         || arg.equals("--verbose-asm")) {
                     genOptions.generateVerboseAsm();
-                }
-                else if (arg.startsWith("-Wa,")) {
+                } else if (arg.startsWith("-Wa,")) {
                     for (String a : parseCommaSeparatedOptions(arg)) {
                         asOptions.addArg(a);
                     }
-                }
-                else if (arg.equals("-Xassembler")) {
+                } else if (arg.equals("-Xassembler")) {
                     asOptions.addArg(nextArg(arg, args));
-                }
-                else if (arg.equals("-static")) {
+                } else if (arg.equals("-static")) {
                     addLdArg(arg);
-                }
-                else if (arg.equals("-shared")) {
+                } else if (arg.equals("-shared")) {
                     ldOptions.generatingSharedLibrary = true;
-                }
-                else if (arg.equals("-pie")) {
+                } else if (arg.equals("-pie")) {
                     ldOptions.generatingPIE = true;
-                }
-                else if (arg.equals("--readonly-got")) {
+                } else if (arg.equals("--readonly-got")) {
                     addLdArg("-z");
                     addLdArg("combreloc");
                     addLdArg("-z");
                     addLdArg("now");
                     addLdArg("-z");
                     addLdArg("relro");
-                }
-                else if (arg.startsWith("-L")) {
+                } else if (arg.startsWith("-L")) {
                     addLdArg("-L" + getOptArg(arg, args));
-                }
-                else if (arg.startsWith("-l")) {
+                } else if (arg.startsWith("-l")) {
                     addLdArg("-l" + getOptArg(arg, args));
-                }
-                else if (arg.equals("-nostartfiles")) {
+                } else if (arg.equals("-nostartfiles")) {
                     ldOptions.noStartFiles = true;
-                }
-                else if (arg.equals("-nodefaultlibs")) {
+                } else if (arg.equals("-nodefaultlibs")) {
                     ldOptions.noDefaultLibs = true;
-                }
-                else if (arg.equals("-nostdlib")) {
+                } else if (arg.equals("-nostdlib")) {
                     ldOptions.noStartFiles = true;
                     ldOptions.noDefaultLibs = true;
-                }
-                else if (arg.startsWith("-Wl,")) {
+                } else if (arg.startsWith("-Wl,")) {
                     for (String opt : parseCommaSeparatedOptions(arg)) {
                         addLdArg(opt);
                     }
-                }
-                else if (arg.equals("-Xlinker")) {
+                } else if (arg.equals("-Xlinker")) {
                     addLdArg(nextArg(arg, args));
-                }
-                else if (arg.equals("-v")) {
+                } else if (arg.equals("-v")) {
                     verbose = true;
                     asOptions.verbose = true;
                     ldOptions.verbose = true;
-                }
-                else if (arg.equals("--version")) {
+                } else if (arg.equals("--version")) {
                     System.out.printf("%s version %s\n",
-                        Compiler.ProgramName, Compiler.Version);
+                            Compiler.ProgramName, Compiler.Version);
                     System.exit(0);
-                }
-                else if (arg.equals("--help")) {
+                } else if (arg.equals("--help")) {
                     printUsage(System.out);
                     System.exit(0);
-                }
-                else {
+                } else {
                     parseError("unknown option: " + arg);
                 }
-            }
-            else {
+            } else {
                 ldArgs.add(new SourceFile(arg));
             }
         }
@@ -264,13 +242,13 @@ class Options {
             parseError("no input file");
         }
         for (SourceFile src : sourceFiles) {
-            if (! src.isKnownFileType()) {
+            if (!src.isKnownFileType()) {
                 parseError("unknown file type: " + src.path());
             }
         }
         if (outputFileName != null
                 && sourceFiles.size() > 1
-                && ! isLinkRequired()) {
+                && !isLinkRequired()) {
             parseError("-o option requires only 1 input (except linking)");
         }
     }
@@ -283,11 +261,17 @@ class Options {
         ldArgs.add(new LdOption(arg));
     }
 
+    /**
+     * 加载源码文件
+     *
+     * @param args 参数
+     * @return 源码文件列表
+     */
     private List<SourceFile> selectSourceFiles(List<LdArg> args) {
         List<SourceFile> result = new ArrayList<SourceFile>();
         for (LdArg arg : args) {
             if (arg.isSourceFile()) {
-                result.add((SourceFile)arg);
+                result.add((SourceFile) arg);
             }
         }
         return result;
@@ -297,20 +281,21 @@ class Options {
         String path = opt.substring(2);
         if (path.length() != 0) {       // -Ipath
             return path;
-        }
-        else {                          // -I path
+        } else {                          // -I path
             return nextArg(opt, args);
         }
     }
 
     private String nextArg(String opt, ListIterator<String> args) {
-        if (! args.hasNext()) {
+        if (!args.hasNext()) {
             parseError("missing argument for " + opt);
         }
         return args.next();
     }
 
-    /** "-Wl,-rpath,/usr/local/lib" -> ["-rpath", "/usr/local/lib"] */
+    /**
+     * "-Wl,-rpath,/usr/local/lib" -> ["-rpath", "/usr/local/lib"]
+     */
     private List<String> parseCommaSeparatedOptions(String opt) {
         String[] opts = opt.split(",");
         if (opts.length <= 1) {

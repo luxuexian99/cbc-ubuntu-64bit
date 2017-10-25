@@ -1,15 +1,27 @@
 package net.loveruby.cflat.compiler;
 import java.io.File;
 
+/**
+ * 源码文件表示
+ */
 class SourceFile implements LdArg {
-    static final String EXT_CFLAT_SOURCE = ".cb";
-    static final String EXT_ASSEMBLY_SOURCE = ".s";
-    static final String EXT_OBJECT_FILE = ".o";
-    static final String EXT_STATIC_LIBRARY = ".a";
-    static final String EXT_SHARED_LIBRARY = ".so";
-    static final String EXT_EXECUTABLE_FILE = "";
+    /** C flat source file postfix */
+    private static final String EXT_CFLAT_SOURCE = ".cb";
+    /** Assembly file postfix */
+    private static final String EXT_ASSEMBLY_SOURCE = ".s";
+    /** Object file postfix */
+    private static final String EXT_OBJECT_FILE = ".o";
+    /** Static library postfix */
+    private static final String EXT_STATIC_LIBRARY = ".a";
+    /** Shared library postfix */
+    private static final String EXT_SHARED_LIBRARY = ".so";
+    /** Executable file postfix */
+    private static final String EXT_EXECUTABLE_FILE = "";
 
-    static final String[] KNOWN_EXTENSIONS = {
+    /**
+     * 不同文件的后缀
+     */
+    private static final String[] KNOWN_EXTENSIONS = {
       EXT_CFLAT_SOURCE,
       EXT_ASSEMBLY_SOURCE,
       EXT_OBJECT_FILE,
@@ -18,7 +30,9 @@ class SourceFile implements LdArg {
       EXT_EXECUTABLE_FILE
     };
 
+    /** 原始文件名 */
     private final String originalName;
+    /** 当前名称 */
     private String currentName;
 
     SourceFile(String name) {
