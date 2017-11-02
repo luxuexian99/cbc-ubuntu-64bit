@@ -78,10 +78,17 @@ public class Compiler {
         }
     }
 
-    private boolean checkSyntax(Options opts) {
+    /**
+     * 语法校验
+     *
+     * @param options 选项
+     * @return 语法是否正确
+     */
+    private boolean checkSyntax(Options options) {
         boolean failed = false;
-        for (SourceFile src : opts.sourceFiles()) {
-            if (isValidSyntax(src.path(), opts)) {
+        List<SourceFile> sourceFiles = options.sourceFiles();
+        for (SourceFile src : sourceFiles) {
+            if (isValidSyntax(src.path(), options)) {
                 System.out.println(src.path() + ": Syntax OK");
             } else {
                 System.out.println(src.path() + ": Syntax Error");
@@ -91,9 +98,16 @@ public class Compiler {
         return !failed;
     }
 
-    private boolean isValidSyntax(String path, Options opts) {
+    /**
+     * 语法校验
+     *
+     * @param path    文件路径
+     * @param options 选项
+     * @return 语法是否正确
+     */
+    private boolean isValidSyntax(String path, Options options) {
         try {
-            parseFile(path, opts);
+            parseFile(path, options);
             return true;
         } catch (SyntaxException ex) {
             return false;
@@ -106,35 +120,34 @@ public class Compiler {
     /**
      * 源码构建
      *
-     * @param srcs 源文件
-     * @param opts 选项
+     * @param srcs    源文件
+     * @param options 配置选项
      * @throws CompileException CompileException
      */
     // #@@range/build{
-    private void build(List<SourceFile> srcs, Options opts)
+    private void build(List<SourceFile> srcs, Options options)
             throws CompileException {
         for (SourceFile src : srcs) {
-
             // 编译源代码
             if (src.isCflatSource()) {
-                String destPath = opts.asmFileNameOf(src);
-                compile(src.path(), destPath, opts);
+                String destPath = options.asmFileNameOf(src);
+                compile(src.path(), destPath, options);
                 src.setCurrentName(destPath);
             }
 
             // 汇编成目标代码
-            if (!opts.isAssembleRequired()) continue;
+            if (!options.isAssembleRequired()) continue;
             if (src.isAssemblySource()) {
-                String destPath = opts.objFileNameOf(src);
-                assemble(src.path(), destPath, opts);
+                String destPath = options.objFileNameOf(src);
+                assemble(src.path(), destPath, options);
                 src.setCurrentName(destPath);
             }
         }
-        if (!opts.isLinkRequired()) {
+        if (!options.isLinkRequired()) {
             return;
         }
         // 链接目标代码
-        link(opts);
+        link(options);
     }
     // #@@}
 
@@ -143,54 +156,71 @@ public class Compiler {
      *
      * @param srcPath  源文件路径
      * @param destPath 目标文件路径
-     * @param opts     参数
+     * @param options  配置选项
      * @throws CompileException 编译异常
      */
-    private void compile(String srcPath, String destPath, Options opts) throws CompileException {
+    private void compile(String srcPath, String destPath, Options options) throws CompileException {
 
         //------------------编译器前端 start---------------------
-        // 1.解析源代码 得到抽象语法树（AST）
-        AST ast = parseFile(srcPath, opts);
-        if (dumpAST(ast, opts.mode())) {
+        // 1.解析源代码 生成抽象语法树（AST）
+        AST ast = parseFile(srcPath, options);
+        if (dumpAST(ast, options.mode())) {
             return;
         }
 
-        TypeTable types = opts.typeTable();
+        TypeTable types = options.typeTable();
 
         // 2.对抽象语法树进行语义分析
-        AST sem = semanticAnalyze(ast, types, opts);
-        if (dumpSemant(sem, opts.mode())) {
+        AST sem = semanticAnalyze(ast, types, options);
+        if (dumpSemant(sem, options.mode())) {
             return;
         }
 
         // 3.生成中间代码
         IR ir = new IRGenerator(types, errorHandler).generate(sem);
-        if (dumpIR(ir, opts.mode())) {
+        if (dumpIR(ir, options.mode())) {
             return;
         }
         //------------------编译器前端 end---------------------
 
         // 4.生成汇编代码
-        AssemblyCode asm = generateAssembly(ir, opts);
-        if (dumpAsm(asm, opts.mode())) {
+        AssemblyCode asm = generateAssembly(ir, options);
+        if (dumpAsm(asm, options.mode())) {
             return;
         }
-        if (printAsm(asm, opts.mode())) {
+        if (printAsm(asm, options.mode())) {
             return;
         }
         writeFile(destPath, asm.toSource());
     }
 
-    private AST parseFile(String path, Options opts) throws SyntaxException, FileException {
-        return Parser.parseFile(new File(path), opts.loader(), errorHandler, opts.doesDebugParser());
+    /**
+     * 语法分析，生成抽象语法树🌲
+     *
+     * @param path    源文件路径
+     * @param options 配置选项
+     * @return 抽象语法树🌲
+     * @throws SyntaxException 语法异常
+     * @throws FileException   文件异常
+     */
+    private AST parseFile(String path, Options options) throws SyntaxException, FileException {
+        return Parser.parseFile(new File(path), options.loader(), errorHandler, options.doesDebugParser());
     }
 
-    private AST semanticAnalyze(AST ast, TypeTable types,
-                                Options opts) throws SemanticException {
+    /**
+     * 对抽象语法树🌲进行语义分析
+     *
+     * @param ast     法抽象树🌲
+     * @param types   类型表
+     * @param options 配置选项
+     * @return 抽象语法树🌲
+     * @throws SemanticException 语义异常
+     */
+    private AST semanticAnalyze(AST ast, TypeTable types, Options options) throws SemanticException {
         new LocalResolver(errorHandler).resolve(ast);
         new TypeResolver(types, errorHandler).resolve(ast);
         types.semanticCheck(errorHandler);
-        if (opts.mode() == CompilerMode.DumpReference) {
+        if (options.mode() == CompilerMode.DumpReference) {
             ast.dump();
             return ast;
         }
@@ -199,40 +229,57 @@ public class Compiler {
         return ast;
     }
 
-    private AssemblyCode generateAssembly(IR ir, Options opts) {
-        return opts.codeGenerator(errorHandler).generate(ir);
+    /**
+     * 生成汇编代码
+     *
+     * @param ir      中间代码生成器
+     * @param options 配置选项
+     * @return 汇编代码
+     */
+    private AssemblyCode generateAssembly(IR ir, Options options) {
+        return options.codeGenerator(errorHandler).generate(ir);
     }
 
     // #@@range/assemble{
-    private void assemble(String srcPath, String destPath,
-                          Options opts) throws IPCException {
-        opts.assembler(errorHandler)
-                .assemble(srcPath, destPath, opts.asOptions());
+
+    /**
+     * 汇编成目标代码
+     *
+     * @param srcPath  源文件目录
+     * @param destPath 目标目录
+     * @param options  配置选项
+     * @throws IPCException IPCException
+     */
+    private void assemble(String srcPath, String destPath, Options options) throws IPCException {
+        options.assembler(errorHandler).assemble(srcPath, destPath, options.asOptions());
     }
     // #@@}
 
     // #@@range/link{
-    private void link(Options opts) throws IPCException {
-        if (!opts.isGeneratingSharedLibrary()) {
-
-            generateExecutable(opts);
+    /**
+     * 链接目标代码
+     *
+     * @param options 配置选项
+     * @throws IPCException IPCException
+     */
+    private void link(Options options) throws IPCException {
+        if (!options.isGeneratingSharedLibrary()) {
+            generateExecutable(options);
         } else {
-            generateSharedLibrary(opts);
+            generateSharedLibrary(options);
         }
     }
     // #@@}
 
     // #@@range/generateExecutable{
     private void generateExecutable(Options opts) throws IPCException {
-        opts.linker(errorHandler).generateExecutable(
-                opts.ldArgs(), opts.exeFileName(), opts.ldOptions());
+        opts.linker(errorHandler).generateExecutable(opts.ldArgs(), opts.exeFileName(), opts.ldOptions());
     }
     // #@@}
 
     // #@@range/generateSharedLibrary{
     private void generateSharedLibrary(Options opts) throws IPCException {
-        opts.linker(errorHandler).generateSharedLibrary(
-                opts.ldArgs(), opts.soFileName(), opts.ldOptions());
+        opts.linker(errorHandler).generateSharedLibrary(opts.ldArgs(), opts.soFileName(), opts.ldOptions());
     }
     // #@@}
 
@@ -241,11 +288,8 @@ public class Compiler {
             System.out.print(str);
             return;
         }
-        try {
-            try (BufferedWriter f = new BufferedWriter(
-                    new OutputStreamWriter(new FileOutputStream(path)))) {
-                f.write(str);
-            }
+        try (BufferedWriter f = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path)))) {
+            f.write(str);
         } catch (FileNotFoundException ex) {
             errorHandler.error("file not found: " + path);
             throw new FileException("file error");

@@ -24,54 +24,54 @@ class GNULinker implements Linker {
 
     // #@@range/generateExecutable{
     public void generateExecutable(List<String> args,
-            String destPath, LinkerOptions opts) throws IPCException {
+            String destPath, LinkerOptions options) throws IPCException {
         List<String> cmd = new ArrayList<String>();
         cmd.add(LINKER);
         cmd.add("-dynamic-linker");
         cmd.add(DYNAMIC_LINKER);
-        if (opts.generatingPIE) {
+        if (options.generatingPIE) {
             cmd.add("-pie");
         }
-        if (! opts.noStartFiles) {
-            cmd.add(opts.generatingPIE
+        if (! options.noStartFiles) {
+            cmd.add(options.generatingPIE
                         ? C_RUNTIME_START_PIE
                         : C_RUNTIME_START);
             cmd.add(C_RUNTIME_INIT);
         }
         cmd.addAll(args);
-        if (! opts.noDefaultLibs) {
+        if (! options.noDefaultLibs) {
             cmd.add("-lc");
             cmd.add("-lcbc");
         }
-        if (! opts.noStartFiles) {
+        if (! options.noStartFiles) {
             cmd.add(C_RUNTIME_FINI);
         }
         cmd.add("-o");
         cmd.add(destPath);
-        CommandUtils.invoke(cmd, errorHandler, opts.verbose);
+        CommandUtils.invoke(cmd, errorHandler, options.verbose);
     }
     // #@@}
 
     // #@@range/generateSharedLibrary{
     public void generateSharedLibrary(List<String> args,
-            String destPath, LinkerOptions opts) throws IPCException {
+            String destPath, LinkerOptions options) throws IPCException {
         List<String> cmd = new ArrayList<String>();
         cmd.add(LINKER);
         cmd.add("-shared");
-        if (! opts.noStartFiles) {
+        if (! options.noStartFiles) {
             cmd.add(C_RUNTIME_INIT);
         }
         cmd.addAll(args);
-        if (! opts.noDefaultLibs) {
+        if (! options.noDefaultLibs) {
             cmd.add("-lc");
             cmd.add("-lcbc");
         }
-        if (! opts.noStartFiles) {
+        if (! options.noStartFiles) {
             cmd.add(C_RUNTIME_FINI);
         }
         cmd.add("-o");
         cmd.add(destPath);
-        CommandUtils.invoke(cmd, errorHandler, opts.verbose);
+        CommandUtils.invoke(cmd, errorHandler, options.verbose);
     }
     // #@@}
 }
